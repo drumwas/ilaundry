@@ -1,0 +1,55 @@
+<%- scriptFile -%>
+<%- include('call.ejs') %>
+<% if(success.length> 0){ %>
+   <script>
+      (function ($) {
+         "use strict"
+         console.log('<%=success%>');
+         toastr.success('<%=success%>', {
+            timeOut: 500000000,
+            closeButton: !0,
+            debug: !1,
+            newestOnTop: !0,
+            progressBar: !0,
+            positionClass: "toast-top-right",
+            preventDuplicates: !0,
+            onclick: null,
+            showDuration: "300",
+            hideDuration: "1000",
+            extendedTimeOut: "1000",
+            showEasing: "swing",
+            hideEasing: "linear",
+            showMethod: "fadeIn",
+            hideMethod: "fadeOut",
+            tapToDismiss: !1
+         })
+      })(jQuery)
+   </script>
+   <% } %>
+      <% if(error.length> 0){ %>
+         <script>
+               (function ($) {
+                  "use strict"
+
+
+                  toastr.error('<%=error%>', {
+                     timeOut: 500000000,
+                     closeButton: !0,
+                     debug: !1,
+                     newestOnTop: !0,
+                     progressBar: !0,
+                     positionClass: "toast-top-right",
+                     preventDuplicates: !0,
+                     onclick: null,
+                     showDuration: "300",
+                     hideDuration: "1000",
+                     extendedTimeOut: "1000",
+                     showEasing: "swing",
+                     hideEasing: "linear",
+                     showMethod: "fadeIn",
+                     hideMethod: "fadeOut",
+                     tapToDismiss: !1
+                  })
+               })(jQuery)
+         </script>
+         <% } %>

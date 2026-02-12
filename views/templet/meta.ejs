@@ -1,0 +1,71 @@
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="author" content="laundry">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+    <%= accessdata?.masterstore?.app_name %>
+</title>
+<!-- Favicon icon -->
+<link rel="icon" type="image/png" sizes="16x16" href="../../uploads/<%= accessdata?.masterstore?.app_favicon %>">
+<!-- Datatable -->
+<link href="../../vendor/datatables/css/jquery.dataTables.min.css" rel="stylesheet">
+<!-- global style sheet for topbar and sidebar -->
+
+<link rel="stylesheet" type="text/css" href="../../vendor/flag-icon.css">
+<link rel="stylesheet" href="../../vendor/select2/css/select2.min.css">
+
+<link href="../../css/style.css" rel="stylesheet">
+<link href="../../css/mobile.css" rel="stylesheet">
+<link href="../../vendor/bootstrap-select/dist/css/bootstrap-select.min.css" rel="stylesheet">
+<!-- Toastr -->
+<link rel="stylesheet" href="../../vendor/toastr/css/toastr.min.css">
+
+<!-- jQuery-ui  -->
+<link rel="stylesheet" href="/Changes/jquery-ui.css">
+
+
+<!-- select2 links  -->
+
+<style>
+    .select2-container .select2-selection--single {
+        padding: 0.3125rem 0.75rem;
+        color: #080808;
+        height: 3.5rem;
+        width: 100%;
+        border-radius: 0.5rem;
+        font-weight: 400;
+        background-color: transparent;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        padding-left: 0px;
+    }
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        width: 10px;
+        top: 77%;
+    }
+</style>
+
+<script src="https://cdn.onesignal.com/sdks/OneSignalSDK.js" defer></script>
+<script>
+    window.OneSignal = window.OneSignal || [];
+    OneSignal.push(function () {
+        OneSignal.init({
+            appId: '<%= accessdata?.masterstore?.onesignal_app_id %>',
+        });
+        OneSignal.on('subscriptionChange', function (isSubscribed) {
+            if (isSubscribed === true) {
+                console.log('The user subscription state is now:', isSubscribed);
+                var pathArray = window.location.pathname.split('/');
+                OneSignal.sendTags({
+                    "Login_ID": '<%= accessdata?.topbardata?.id %>',
+                    "subscription_user_Type": '<%= accessdata?.logas %>',
+                }).then(function (tagsSent) {
+
+                    console.log("tagsSent", tagsSent);
+                });
+            }
+        });
+    });
+</script>

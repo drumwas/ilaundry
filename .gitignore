@@ -1,0 +1,7 @@
+node_modules/
+config.env
+error.txt
+.ftpquota
+tmp/
+*.log
+.DS_Store

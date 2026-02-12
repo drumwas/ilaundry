@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en" class="h-100">
+
+
+<head>
+    <!-- meta and links start -->
+    <%- include('templet/meta')-%>
+
+        <style>
+
+        </style>
+
+</head>
+
+<body>
+    <%- include('templet/preloder_topbar_sidebar',{titel: accessdata?.topbardata?.name})-%>
+
+        <!--********** Content body start **********-->
+
+        <div class="content-body">
+
+            <div class="container-fluid" style="min-height: 100vh;">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card ">
+
+                            <div class="card-body">
+
+                                <div class="shop_form">
+                                    <form class="row align-items-center" action="/tool/setmasterdata" method="post"
+                                        enctype="multipart/form-data" id="master_setting">
+                                        <div class="row">
+
+                                            <p class="mt-5">
+                                                <%= language.Logo_Settings %>
+                                            </p>
+                                            <hr>
+
+                                            <div class="row mt-4 mb-5 justify-content-between">
+                                                <div class="col-md-4 align-self-end mb-3">
+                                                    <label class="form-label">
+                                                        <%= language.App_Name %>
+                                                    </label>
+                                                    <input type="text" class="form-control" name="appname"
+                                                        value="<%= masterstore.app_name %>"
+                                                        placeholder="Enter App Name">
+                                                </div>
+
+                                                <div class="form-input col-md-4 ">
+                                                    <center>
+                                                        <div class="preview m-3 mt-0">
+                                                            <img id="file-preview" width="180"
+                                                                src="../uploads/<%= masterstore.app_logo %>"
+                                                                alt="image">
+                                                        </div>
+                                                        <input class="d-none" type="file" id="logo" name="logo"
+                                                            accept="image/*" onchange="showPreview(event);">
+                                                        <div>
+                                                            <label class="btn btn-primary w-75 mb-0  align-self-end"
+                                                                for="logo">
+                                                                <%= language.Logo %>
+                                                            </label>
+                                                        </div>
+                                                    </center>
+                                                </div>
+
+                                                <div class="form-input col-md-4">
+                                                    <center>
+                                                        <div class="preview m-3 mt-0 mb-3 p-4">
+                                                            <img id="file-favicon" width="100"
+                                                                src="../uploads/<%= masterstore.app_favicon %>"
+                                                                alt="image">
+                                                        </div>
+
+                                                        <input class="d-none" type="file" id="favicon" name="favicon"
+                                                            accept="image/*" onchange="showfavicon(event);">
+                                                        <div class="pt-3">
+                                                            <label class="btn btn-primary w-75 mb-0 align-self-end"
+                                                                for="favicon">
+                                                                <%= language.Favicon %>
+                                                            </label>
+                                                        </div>
+                                                    </center>
+                                                </div>
+
+
+
+                                            </div>
+
+
+                                            <p>
+                                                <%= language.Muilty_Store_Settings %>
+                                            </p>
+                                            <hr>
+
+                                            <div class="col-md-6 col-12">
+                                                <div class="form-check form-switch">
+                                                    <label class="form-check-label mx-1" for="multy">
+                                                        <h4>
+                                                            <%= language.Single_Store_or_Multi_Store %>
+                                                        </h4>
+                                                    </label>
+                                                    <input class="form-check-input" type="checkbox" id="multy"
+                                                        name="multy" value="1" <%=masterstore.type==1 ? 'checked' : ''
+                                                        %>>
+                                                </div>
+                                                <div class="<%=  masterstore.type != 1  ? '' : 'd-none' %> "
+                                                    id="store_source">
+                                                    <select
+                                                        class="form-select bg-white mt-4 <%=  masterstore.type != 1  ? '' : 'd-none' %> "
+                                                        id="fromStore" name="fromStore">
+                                                        <option value="">Select Source Store</option>
+                                                        <% storeList.forEach(function(store) { %>
+                                                            <option value="<%= store.id %>"
+                                                                <%=masterstore.fromStore==store.id ? 'selected' : '' %>>
+                                                                <%= store.name %>
+                                                            </option>
+                                                            <% }); %>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <!-- <div class="col-md-4">
+
+                                            </div> -->
+
+                                            <div class="col-md-6 col-12">
+                                                <div class="form-check form-switch <%=  masterstore.type == 1  ? '' : 'd-none' %> text-end text-nowrap d-flex justify-content-start justify-content-md-end"
+                                                    id="custmor_selection_main">
+                                                    <div>
+                                                        <label class="form-check-label mx-1">
+                                                            <h4>
+                                                                <%= language.Disable_select_store %>
+                                                            </h4>
+                                                        </label>
+                                                        <input class="form-check-input" type="checkbox"
+                                                            id="custmor_selection" name="custmor_selection" value="1"
+                                                            <%=masterstore.customer_selection==1 ? 'checked' : '' %>>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+
+
+
+
+
+
+
+                                            <p class="mt-5">
+                                                <%= language.Auto_Approval_Settings %>
+                                            </p>
+                                            <hr>
+
+
+                                            <div class="col-xl-4 col-12 mt-5">
+                                                <div class="form-check form-switch d-flex">
+                                                    <div>
+                                                        <label class="form-check-label mx-1" for="customer_approved">
+                                                            <h4 class="text-nowrap">
+                                                                <%= language.Customer_Auto_Approved %>
+                                                            </h4>
+                                                        </label>
+                                                        <input class="form-check-input" type="checkbox"
+                                                            id="customer_approved" name="customer_approved" value="1"
+                                                            <%=masterstore.customer_autoapprove==1 ? 'checked' : '' %>>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-xl-4 col-12 mt-xl-5 mt-3 ">
+                                                <div
+                                                    class="form-check form-switch d-flex justify-content-start justify-content-xl-end">
+                                                    <div>
+                                                        <label class="form-check-label mx-1" for="store_approved">
+                                                            <h4 class="text-nowrap">
+                                                                <%= language.Store_Auto_Approved %>
+                                                            </h4>
+                                                        </label>
+                                                        <input class="form-check-input" type="checkbox"
+                                                            id="store_approved" name="store_approved" value="1"
+                                                            <%=masterstore.store_autoapprove==1 ? 'checked' : '' %>>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+
+                                            <div class="col-lg-4 col-12 d-none">
+                                                <label class="form-label">
+                                                    <%= language.Default_Store_Roll %>
+                                                </label>
+                                                <select class="default-select form-control wide" name="storeroll">
+                                                    <option value="0" selected>Choose Roll</option>
+                                                    <% roll.forEach(function(data){ %>
+                                                        <option value="<%=data.id %>" <%=data.rollType=='master'
+                                                            ? 'selected' : '' %> ><%=data.roll%>
+                                                        </option>
+                                                        <% }) %>
+                                                </select>
+                                            </div>
+
+
+                                            <p class="mt-5">
+                                                <%= language.Currency_Settings %>
+                                            </p>
+                                            <hr>
+                                            <div class="col-xl-4 col-lg-6 col-12 mt-4">
+                                                <label class="form-label">
+                                                    <%= language.Currency %>
+                                                </label>
+                                                <input type="text" class="form-control" name="currency"
+                                                    value="<%= masterstore.currency_symbol%>"
+                                                    placeholder="Enter Currency Symbol">
+                                            </div>
+
+                                            <div class="col-xl-4 col-lg-6 col-12 mt-4">
+                                                <label for="" class="m-3"> </label>
+                                                <div class="form-check form-switch">
+                                                    <label class="form-check-label mx-1" for="Symbol_Placement">
+                                                        <h5>
+                                                            <%= language.Currency_Symbol_Placement_Right_side %> (<%=
+                                                                    language.Default_Left_Side %>)
+                                                        </h5>
+                                                    </label>
+                                                    <input class="form-check-input" type="checkbox"
+                                                        id="Symbol_Placement" name="Symbol_Placement" value="1"
+                                                        <%=masterstore.currency_placement==1 ? 'checked' : '' %>>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-xl-4 col-lg-6 col-12 mt-4">
+                                                <label for="Thousands_Separator" class="form-label">
+                                                    <%= language.Thousands_Separator %>
+                                                </label>
+                                                <select class="form-control wide" name="thousands_separator">
+                                                    <option value="1" <%=masterstore.thousands_separator==1 ? 'selected'
+                                                        : '' %> >, (Comma)</option>
+                                                    <option value="2" <%=masterstore.thousands_separator==2 ? 'selected'
+                                                        : '' %> >. (Full Stop)</option>
+                                                    <option value="3" <%=masterstore.thousands_separator==3 ? 'selected'
+                                                        : '' %> >` (Apostrophe)</option>
+                                                    <option value="4" <%=masterstore.thousands_separator==4 ? 'selected'
+                                                        : '' %> >None</option>
+                                                    <option value="5" <%=masterstore.thousands_separator==5 ? 'selected'
+                                                        : '' %> >Space</option>
+                                                </select>
+                                            </div>
+
+                                            <p class="mt-5">
+                                                <%= language.Other_Settings %>
+                                            </p>
+                                            <hr>
+                                            <div class="col-md-6 mt-4">
+                                                <label class="form-label">
+                                                    <%= language.Timezone %>
+                                                </label>
+                                                <select class="default-select form-control wide" name="timezone"
+                                                    id="timezone" data-id="<%= masterstore.timezone %>">
+                                                    <option value selected disabled>Choose Timezone</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-6 mt-4">
+                                                <label class="form-label">
+                                                    Footer
+                                                </label>
+                                                <input type="text" class="form-control" name="footer"
+                                                    value="<%= masterstore.footer %>">
+                                            </div>
+
+                                            <!-- <div class="col-md-4 mt-4">
+                                                <label class="form-label"><%= language.Printer_POS %> </label>
+                                                <select class="default-select form-control wide" name="printer_pos">
+                                                    <option value="0" <%= masterstore.printer == 0 ?  'selected' : '' %>>A4</option>
+                                                    <option value="1" <%= masterstore.printer == 1 ?  'selected' : '' %>>Thermal</option>
+                                                </select>
+                                            </div> -->
+
+
+                                            <p class="mt-5">
+                                                <%= language.Notification_Verification %>
+                                            </p>
+                                            <hr>
+                                            <div class="col-md-6 mt-4">
+                                                <label class="form-label">
+                                                    <%= language.OneSignal_App_ID %>
+                                                </label>
+                                                <input type="text" class="form-control" name="onesignal_app_id"
+                                                    value="*****">
+                                            </div>
+
+                                            <div class="col-md-6 mt-4">
+                                                <label class="form-label">
+                                                    <%= language.OneSignal_API_Key %>
+                                                </label>
+                                                <input type="text" class="form-control" name="onesignal_api_key"
+                                                    value="*****">
+                                            </div>
+
+
+                                            <p class="mt-5">
+                                                <%= language.SMS_Verification %>
+                                            </p>
+                                            <hr>
+
+                                            <div class="col-md-6 col-12 mb-2">
+                                                <label class="form-label">
+                                                    <%= language.Twilio_Account_SID %>
+                                                </label>
+                                                <input class="form-control" type="text" name="twilio_sid" value="*****"
+                                                    placeholder="Twilio Account SID">
+                                            </div>
+
+                                            <div class="col-md-6 col-12 mb-3">
+                                                <label class="form-label">
+                                                    <%= language.Twilio_Auth_Token %>
+                                                </label>
+                                                <input class="form-control" type="text" name="twilio_auth_token"
+                                                    value="*****" placeholder="Twilio Auth Token">
+                                            </div>
+
+                                            <div class="col-md-6 col-12">
+                                                <label class="form-label">
+                                                    <%= language.Twilio_Phone_Number %>
+                                                </label>
+                                                <input class="form-control" type="text" name="twilio_phone_no"
+                                                    value="*****" placeholder="Twilio Phone Number">
+                                            </div>
+
+                                            <div class="col-12 mt-4">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <%= language.Save_Data %>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    <!-- M-Pesa Settings Form (Separate) -->
+                                    <form class="row align-items-center mt-4" action="/mpesa/settings" method="post"
+                                        id="mpesa_settings">
+                                        <div class="row">
+                                            <p class="mt-5">
+                                                <i class="fas fa-mobile-alt me-2"></i> M-Pesa Integration Settings
+                                            </p>
+                                            <hr>
+
+                                            <div class="col-md-6 col-12 mb-3">
+                                                <div class="form-check form-switch">
+                                                    <label class="form-check-label mx-1" for="mpesa_enabled">
+                                                        <h4>Enable M-Pesa Payments</h4>
+                                                    </label>
+                                                    <input class="form-check-input" type="checkbox" id="mpesa_enabled"
+                                                        name="mpesa_enabled" value="1" <%=masterstore.mpesa_enabled==1
+                                                        ? 'checked' : '' %>>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-md-6 col-12 mb-3">
+                                                <label class="form-label">Environment</label>
+                                                <select class="form-control" name="mpesa_environment">
+                                                    <option value="sandbox" <%=masterstore.mpesa_environment=='sandbox'
+                                                        ? 'selected' : '' %>>Sandbox (Testing)</option>
+                                                    <option value="production"
+                                                        <%=masterstore.mpesa_environment=='production' ? 'selected' : ''
+                                                        %>>Production (Live)</option>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-md-6 col-12 mb-3">
+                                                <label class="form-label">Consumer Key</label>
+                                                <input class="form-control" type="password" name="mpesa_consumer_key"
+                                                    value="<%=masterstore.mpesa_consumer_key || '' %>"
+                                                    placeholder="Enter Consumer Key">
+                                            </div>
+
+                                            <div class="col-md-6 col-12 mb-3">
+                                                <label class="form-label">Consumer Secret</label>
+                                                <input class="form-control" type="password" name="mpesa_consumer_secret"
+                                                    value="<%=masterstore.mpesa_consumer_secret || '' %>"
+                                                    placeholder="Enter Consumer Secret">
+                                            </div>
+
+                                            <div class="col-md-6 col-12 mb-3">
+                                                <label class="form-label">Shortcode (Paybill/Till)</label>
+                                                <input class="form-control" type="text" name="mpesa_shortcode"
+                                                    value="<%=masterstore.mpesa_shortcode || '' %>"
+                                                    placeholder="e.g., 174379">
+                                            </div>
+
+                                            <div class="col-md-6 col-12 mb-3">
+                                                <label class="form-label">Passkey</label>
+                                                <input class="form-control" type="password" name="mpesa_passkey"
+                                                    value="<%=masterstore.mpesa_passkey || '' %>"
+                                                    placeholder="Enter Passkey">
+                                            </div>
+
+                                            <div class="col-12 mb-3">
+                                                <div class="alert alert-info">
+                                                    <i class="fas fa-info-circle me-2"></i>
+                                                    <strong>Callback URLs:</strong> After saving, register these URLs
+                                                    with Safaricom:
+                                                    <ul class="mb-0 mt-2">
+                                                        <li>Validation:
+                                                            <code>https://yourdomain.com/mpesa/validation</code>
+                                                        </li>
+                                                        <li>Confirmation:
+                                                            <code>https://yourdomain.com/mpesa/confirmation</code>
+                                                        </li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 d-flex gap-2 flex-wrap">
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-save me-2"></i> Save M-Pesa Settings
+                                                </button>
+                                                <button type="button" class="btn btn-outline-secondary"
+                                                    id="testMpesaConnection">
+                                                    <i class="fas fa-plug me-2"></i> Test Connection
+                                                </button>
+                                                <a href="/mpesa/list" class="btn btn-outline-primary">
+                                                    <i class="fas fa-list me-2"></i> View Transactions
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+
+                </div>
+            </div>
+
+
+        </div>
+
+        <!--********** Content body end **********-->
+
+        <!-- <<<<<<<<<alert mode >>>>>>>>>>> -->
+        <div class="modal fade" id="multy_alert">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                </div>
+
+            </div>
+
+        </div>
+
+
+
+
+        <div class="modal fade" id="POS_coupon_model" tabindex="-1" aria-labelledby="POSCouponModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header text-primary bg-white">
+                        <h5 class="modal-title text-primary bg-white" id="POSCouponModalLabel">
+                            <%= language.Confirmation %>
+                        </h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+
+                        <div class="alert alert-warning">
+                            <p class="mb-0" style="font-size: 14px !important;"><strong>
+                                    <%= language.Note %> :
+                                </strong>
+                                <%= language.Are_you_sure_you_want_to_switch_Multi_Store_Branch_to_Single %>
+                            </p>
+                        </div>
+
+                        <p style="font-size: 14px !important;">
+                            <%= language.All_customer_data_will_be_moved_to_the_store_you_select_as_the_single_store %>
+                        </p>
+
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button class="btn btn-primary btn-sm" id="multy_confirm">
+                            <%= language.Confirm %>
+                        </button>
+                        <button class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
+                            <%= language.Cancel %>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        </div>
+        <!--**********************************
+            Footer start
+        ***********************************-->
+        <%- include('templet/footer')-%>
+
+            <!--**********************************
+            Footer end
+        ***********************************-->
+
+            </div>
+
+            <!--********** Main Wrapper End **********-->
+            <%- include('templet/script')-%>
+
+                <script>
+                    document.getElementById("multy_confirm").addEventListener("click", function () {
+                        const modalElement = document.getElementById('POS_coupon_model');
+                        const modal = bootstrap.Modal.getInstance(modalElement);
+                        modalElement.setAttribute('data-confirm', 'true');
+
+                        document.getElementById('multy').checked = false;
+
+                        // ✅ Show store_source div
+                        document.getElementById('store_source').classList.remove('d-none');
+
+                        // ✅ Set required
+                        document.getElementById('fromStore').setAttribute('required', 'true');
+
+                        // ✅ Initialize select2 safely
+                        $('#fromStore').select2({
+                            placeholder: "Search Source Store",
+                            width: '100%'
+                        });
+
+                        modal.hide();
+                    });
+
+                    document.getElementById("multy").addEventListener("change", function () {
+                        const isChecked = this.checked;
+
+                        if (isChecked) {
+
+                            document.getElementById('store_source').classList.add('d-none');
+                            document.getElementById('fromStore').value = '';
+                            document.getElementById('fromStore').removeAttribute('required');
+                            document.getElementById('custmor_selection_main').classList.remove('d-none')
+                        } else {
+
+                            document.getElementById('store_source').classList.remove('d-none');
+                            document.getElementById('fromStore').setAttribute('required', 'true');
+                            document.getElementById('custmor_selection_main').classList.add('d-none')
+
+
+                            $('#fromStore').select2({
+                                placeholder: "Search Source Store",
+                                width: '100%'
+                            });
+                        }
+                    });
+
+                    document.getElementById('POS_coupon_model').addEventListener('hidden.bs.modal', function () {
+                        const modalElement = document.getElementById('POS_coupon_model');
+                        const isConfirm = modalElement.getAttribute('data-confirm') === 'true';
+
+                        if (!isConfirm) {
+                            document.getElementById('multy').checked = true;
+
+
+                            document.getElementById('store_source').classList.add('d-none');
+                            document.getElementById('fromStore').removeAttribute('required');
+                        }
+
+                        modalElement.removeAttribute('data-confirm');
+                    });
+
+                    // M-Pesa Test Connection
+                    document.getElementById('testMpesaConnection')?.addEventListener('click', function () {
+                        const btn = this;
+                        btn.disabled = true;
+                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+
+                        $.ajax({
+                            url: '/mpesa/test-connection',
+                            method: 'GET',
+                            success: function (res) {
+                                if (res.success) {
+                                    toastr.success('M-Pesa connection successful!');
+                                } else {
+                                    toastr.error(res.message || 'Connection failed');
+                                }
+                            },
+                            error: function (xhr) {
+                                const msg = xhr.responseJSON?.message || 'Connection failed';
+                                toastr.error(msg);
+                            },
+                            complete: function () {
+                                btn.disabled = false;
+                                btn.innerHTML = '<i class="fas fa-plug me-2"></i> Test Connection';
+                            }
+                        });
+                    });
+                </script>
+
+
+</body>
+
+</html>
