@@ -1,9 +1,10 @@
 const express = require("express");
 const app = express();
-require("dotenv").config({ path: "config.env" });
+const path = require("path");
+require("dotenv").config({ path: path.join(__dirname, "config.env") });
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const path = require("path");
+
 const { conn } = require("./middelwer/db");
 const session = require("express-session");
 const flash = require("connect-flash");
