@@ -58,11 +58,11 @@ app.use(
 conn.query("SELECT timezone FROM tbl_master_shop where id=1", (err, row) => {
   if (err) {
     console.error("Failed to load timezone:", err.message);
+    setTZ(process.env.TIMEZONE || 'UTC');
     return;
   }
-  if (row && row.length > 0) {
-    setTZ(row[0].timezone || 'UTC');
-  }
+  const tz = row?.[0]?.timezone;
+  setTZ(tz && tz !== 'undefined' ? tz : (process.env.TIMEZONE || 'UTC'));
 });
 
 app.use((req, res, next) => {
