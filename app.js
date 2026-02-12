@@ -61,7 +61,7 @@ conn.query("SELECT timezone FROM tbl_master_shop where id=1", (err, row) => {
     return;
   }
   if (row && row.length > 0) {
-    setTZ(row[0].timezone);
+    setTZ(row[0].timezone || 'UTC');
   }
 });
 
