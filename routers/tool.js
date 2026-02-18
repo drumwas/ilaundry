@@ -12,6 +12,7 @@ var {
   DataUpdate,
   DataInsert,
   DataFind,
+  DataQuery,
 } = require("../middelwer/databaseQurey");
 
 // <<<<<<<<<<roll >>>>>>>>>>>>>>>>>
@@ -781,7 +782,7 @@ router.get("/storelist", auth, async (req, res) => {
     if (rolldetail[0].rollType === "master") {
       const multiy = await DataFind("SELECT type FROM tbl_master_shop");
       if (multiy[0].type == 1) {
-        var storeList = await DataFind("SELECT * FROM tbl_store");
+        var storeList = await DataFind("SELECT * FROM tbl_store WHERE delete_flage=0");
         res.render("storelist", {
           storeList,
           accessdata,
@@ -797,6 +798,43 @@ router.get("/storelist", auth, async (req, res) => {
       return res.redirect(req.get("Referrer") || "/");
     }
   } catch (error) { }
+});
+
+// Delete shop (soft delete) — master only
+router.get("/deleteshop/:id", auth, async (req, res) => {
+  try {
+    if (process.env.DISABLE_DB_WRITE === 'true') {
+      req.flash('error', 'For demo purpose we disabled crud operations!!');
+      return res.redirect(req.get("Referrer") || "/");
+    }
+    const { id, roll, store, loginas } = req.user;
+    if (loginas == 0) {
+      req.flash("error", "You are not authorized for this");
+      return res.redirect(req.get("Referrer") || "/");
+    }
+    const rolldetail = await DataFind(`
+      SELECT sr.*, r.roll_status, r.rollType
+      FROM tbl_staff_roll sr
+      JOIN tbl_roll r ON sr.main_roll_id = r.id
+      WHERE sr.id = ${roll}
+    `);
+    if (rolldetail[0].rollType === "master" && rolldetail[0].branch_n_store.includes("write")) {
+      const shopId = req.params.id;
+      // Soft-delete the store
+      await DataQuery(`UPDATE tbl_store SET delete_flage = 1, status = 0 WHERE id = ?`, [shopId]);
+      // Deactivate associated admin accounts
+      await DataQuery(`UPDATE tbl_admin SET approved = 0 WHERE store_ID = ?`, [shopId]);
+      req.flash("success", "Shop deleted successfully!");
+      res.redirect("/tool/storelist");
+    } else {
+      req.flash("error", "You are not authorized for this");
+      return res.redirect(req.get("Referrer") || "/");
+    }
+  } catch (error) {
+    console.error("Delete shop error:", error.message);
+    req.flash("error", "Failed to delete shop");
+    res.redirect("/tool/storelist");
+  }
 });
 
 //  branch store data render page master only

@@ -70,8 +70,8 @@ router.get("/list", auth, async (req, res) => {
     ) {
       const servicesdata = await DataFind(
         "SELECT tbl_services.*,(SELECT GROUP_CONCAT(`services_type`) from `tbl_services_type` WHERE find_in_set(tbl_services_type.id,tbl_services.services_type_id)) as serviceType FROM tbl_services WHERE store_ID=" +
-          store +
-          ""
+        store +
+        ""
       );
       res.render("service", {
         servicesdata: servicesdata,
@@ -140,10 +140,10 @@ router.get("/addservice", auth, async (req, res) => {
 
 router.post("/addservice", auth, upload.single("image"), async (req, res) => {
   try {
-      if (process.env.DISABLE_DB_WRITE === 'true') {
-    req.flash('error', 'For demo purpose we disabled crud operations!!');
-    return res.redirect(req.get("Referrer") || "/");
-}
+    if (process.env.DISABLE_DB_WRITE === 'true') {
+      req.flash('error', 'For demo purpose we disabled crud operations!!');
+      return res.redirect(req.get("Referrer") || "/");
+    }
     const { id, roll, store } = req.user;
     const rolldetail = await DataFind(`
   SELECT 
@@ -227,10 +227,10 @@ router.get("/deletservices/:id", auth, async (req, res) => {
       //   "DELETE FROM tbl_services WHERE id=" + dataid + ""
       // );
 
- if(await DataDelete(`tbl_services`, `id = '${dataid}'`, req.hostname, req.protocol) == -1) {
-            req.flash('error', process.env.dataerror);
-            return res.redirect("/validate");
-          }
+      if (await DataDelete(`tbl_services`, `id = '${dataid}'`, req.hostname, req.protocol) == -1) {
+        req.flash('error', process.env.dataerror);
+        return res.redirect("/validate");
+      }
 
       req.flash("success", "Services Deleted");
       res.redirect("back");
@@ -262,8 +262,8 @@ router.get("/updateService/:id", auth, async (req, res) => {
       );
       var servicestypedata = await DataFind(
         "SELECT * FROM tbl_services_type WHERE status=0 AND store_ID=" +
-          servicesdata[0].store_ID +
-          ""
+        servicesdata[0].store_ID +
+        ""
       );
       console.log(2222222222, servicesdata);
       console.log(333333333, servicestypedata);
@@ -297,10 +297,10 @@ router.post(
   upload.single("image_update"),
   async (req, res) => {
     try {
-        if (process.env.DISABLE_DB_WRITE === 'true') {
-    req.flash('error', 'For demo purpose we disabled crud operations!!');
-    return res.redirect(req.get("Referrer") || "/");
-}
+      if (process.env.DISABLE_DB_WRITE === 'true') {
+        req.flash('error', 'For demo purpose we disabled crud operations!!');
+        return res.redirect(req.get("Referrer") || "/");
+      }
       const { id, roll, store } = req.user;
       const rolldetail = await DataFind(`
   SELECT 
@@ -323,18 +323,18 @@ router.post(
           // );
 
 
-const updateServiceImage = await DataUpdate(
-  "tbl_services",
-  `image = '${img}'`,
-  `id = ${req.params.id}`,
-  req.hostname,
-  req.protocol
-);
+          const updateServiceImage = await DataUpdate(
+            "tbl_services",
+            `image = '${img}'`,
+            `id = ${req.params.id}`,
+            req.hostname,
+            req.protocol
+          );
 
-if (updateServiceImage === -1) {
-  req.flash("errors", process.env.dataerror);
-  return res.redirect("/validate");
-}
+          if (updateServiceImage === -1) {
+            req.flash("errors", process.env.dataerror);
+            return res.redirect("/validate");
+          }
 
         }
 
@@ -356,21 +356,21 @@ if (updateServiceImage === -1) {
 
         // var qury = `UPDATE tbl_services SET name='${name_update}',services_type_id='${service_type}',
         //     services_type_price='${service_price}',status='${active_update}' WHERE id = ${req.params.id}`;
-            
+
         // const newservtype = await DataFind(qury);
 
-          const newservtype = await DataUpdate(
-            "tbl_services",
-            `name = '${name_update}', services_type_id = '${service_type}', services_type_price = '${service_price}', status = '${active_update}'`,
-            `id = ${req.params.id}`,
-            req.hostname,
-            req.protocol
-          );
-          
-          if (newservtype === -1) {
-            req.flash("errors", process.env.dataerror);
-            return res.redirect("/validate");
-          }
+        const newservtype = await DataUpdate(
+          "tbl_services",
+          `name = '${name_update}', services_type_id = '${service_type}', services_type_price = '${service_price}', status = '${active_update}'`,
+          `id = ${req.params.id}`,
+          req.hostname,
+          req.protocol
+        );
+
+        if (newservtype === -1) {
+          req.flash("errors", process.env.dataerror);
+          return res.redirect("/validate");
+        }
 
         req.flash("success", "Services Updated");
         res.redirect("/services/list");
@@ -437,8 +437,8 @@ router.get("/type", auth, async (req, res) => {
         );
         const servicestypedata = await DataFind(
           "SELECT * FROM tbl_services_type WHERE store_ID=" +
-            storeID[0].store_ID +
-            ""
+          storeID[0].store_ID +
+          ""
         );
         res.render("service_type", {
           servicesTypeList: servicestypedata,
@@ -475,10 +475,10 @@ router.get("/type", auth, async (req, res) => {
 
 router.post("/addtype", auth, async (req, res) => {
   try {
-      if (process.env.DISABLE_DB_WRITE === 'true') {
-    req.flash('error', 'For demo purpose we disabled crud operations!!');
-    return res.redirect(req.get("Referrer") || "/");
-}
+    if (process.env.DISABLE_DB_WRITE === 'true') {
+      req.flash('error', 'For demo purpose we disabled crud operations!!');
+      return res.redirect(req.get("Referrer") || "/");
+    }
     const { id, roll, store, loginas } = req.user;
 
     if (loginas == 0) {
@@ -496,9 +496,10 @@ router.post("/addtype", auth, async (req, res) => {
   WHERE sr.id = ${roll}
 `);
     if (rolldetail[0].service.includes("write")) {
-      var { service_name, active, storeid } = req.body;
+      var { service_name, active, storeid, pricing_mode } = req.body;
       active ? (active = 0) : (active = 1);
       storeid ? storeid : (storeid = store);
+      pricing_mode = (pricing_mode === "per_kg") ? "per_kg" : "per_item";
 
       // var qury =
       //   "INSERT INTO tbl_services_type (services_type,status,store_ID) VALUE ('" +
@@ -512,8 +513,8 @@ router.post("/addtype", auth, async (req, res) => {
 
       const newservtype = await DataInsert(
         `tbl_services_type`,
-        `services_type,status,store_ID`,
-        `${await mysql.escape(service_name)}, ${active}, ${storeid}`,
+        `services_type,status,store_ID,pricing_mode`,
+        `${await mysql.escape(service_name)}, ${active}, ${storeid}, '${pricing_mode}'`,
         req.hostname,
         req.protocol
       );
@@ -536,10 +537,10 @@ router.post("/addtype", auth, async (req, res) => {
 
 router.get("/deletservicestype/:id", auth, async (req, res) => {
   try {
-      if (process.env.DISABLE_DB_WRITE === 'true') {
-    req.flash('error', 'For demo purpose we disabled crud operations!!');
-    return res.redirect(req.get("Referrer") || "/");
-}
+    if (process.env.DISABLE_DB_WRITE === 'true') {
+      req.flash('error', 'For demo purpose we disabled crud operations!!');
+      return res.redirect(req.get("Referrer") || "/");
+    }
     const { id, roll, store, loginas } = req.user;
 
     if (loginas == 0) {
@@ -562,10 +563,10 @@ router.get("/deletservicestype/:id", auth, async (req, res) => {
       //   "DELETE FROM tbl_services_type WHERE id=" + dataid + ""
       // );
 
- if(await DataDelete(`tbl_services_type`, `id = '${dataid}'`, req.hostname, req.protocol) == -1) {
-            req.flash('error', process.env.dataerror);
-            return res.redirect("/validate");
-          }
+      if (await DataDelete(`tbl_services_type`, `id = '${dataid}'`, req.hostname, req.protocol) == -1) {
+        req.flash('error', process.env.dataerror);
+        return res.redirect("/validate");
+      }
 
       req.flash("success", "Services Type Deleted");
       res.redirect("back");
@@ -580,10 +581,10 @@ router.get("/deletservicestype/:id", auth, async (req, res) => {
 
 router.post("/updateservicestype/:id", auth, async (req, res) => {
   try {
-      if (process.env.DISABLE_DB_WRITE === 'true') {
-    req.flash('error', 'For demo purpose we disabled crud operations!!');
-    return res.redirect(req.get("Referrer") || "/");
-}
+    if (process.env.DISABLE_DB_WRITE === 'true') {
+      req.flash('error', 'For demo purpose we disabled crud operations!!');
+      return res.redirect(req.get("Referrer") || "/");
+    }
     const { id, roll, store, loginas } = req.user;
 
     if (loginas == 0) {
@@ -601,9 +602,10 @@ router.post("/updateservicestype/:id", auth, async (req, res) => {
   WHERE sr.id = ${roll}
 `);
     if (rolldetail[0].service.includes("edit")) {
-      var { service_name, active } = req.body;
+      var { service_name, active, pricing_mode } = req.body;
       var dataid = req.params.id;
       active ? (active = 0) : (active = 1);
+      pricing_mode = (pricing_mode === "per_kg") ? "per_kg" : "per_item";
 
       // const newservtype = await DataFind(
       //   "UPDATE tbl_services_type SET services_type='" +
@@ -616,17 +618,17 @@ router.post("/updateservicestype/:id", auth, async (req, res) => {
       // );
 
       const updateServiceType = await DataUpdate(
-  "tbl_services_type",
-  `services_type = '${service_name}', status = ${active}`,
-  `id = ${dataid}`,
-  req.hostname,
-  req.protocol
-);
+        "tbl_services_type",
+        `services_type = '${service_name}', status = ${active}, pricing_mode = '${pricing_mode}'`,
+        `id = ${dataid}`,
+        req.hostname,
+        req.protocol
+      );
 
-if (updateServiceType === -1) {
-  req.flash("errors", process.env.dataerror);
-  return res.redirect("/validate");
-}
+      if (updateServiceType === -1) {
+        req.flash("errors", process.env.dataerror);
+        return res.redirect("/validate");
+      }
 
 
       req.flash("success", "Services Type Updated");
@@ -662,8 +664,8 @@ router.get("/typelist/:id", auth, async (req, res) => {
         var dataid = req.params.id;
         const servicestypedata = await DataFind(
           "SELECT * FROM tbl_services_type WHERE status=0 AND store_ID=" +
-            dataid +
-            " "
+          dataid +
+          " "
         );
         return res.status(200).json({ data: servicestypedata });
       } else {
@@ -682,8 +684,8 @@ router.get("/typelist/:id", auth, async (req, res) => {
     ) {
       const servicestypedata = await DataFind(
         "SELECT * FROM tbl_services_type WHERE status=0 AND store_ID=" +
-          store +
-          ""
+        store +
+        ""
       );
       res.status(200).json({ data: servicestypedata });
     } else {
@@ -750,8 +752,8 @@ router.get("/addon", auth, async (req, res) => {
         );
         const addondata = await DataFind(
           "SELECT * FROM tbl_addons WHERE store_ID='" +
-            storeID[0].store_ID +
-            "'"
+          storeID[0].store_ID +
+          "'"
         );
 
         res.render("addons", {
@@ -789,10 +791,10 @@ router.get("/addon", auth, async (req, res) => {
 
 router.post("/addaddon", auth, async (req, res) => {
   try {
-      if (process.env.DISABLE_DB_WRITE === 'true') {
-    req.flash('error', 'For demo purpose we disabled crud operations!!');
-    return res.redirect(req.get("Referrer") || "/");
-}
+    if (process.env.DISABLE_DB_WRITE === 'true') {
+      req.flash('error', 'For demo purpose we disabled crud operations!!');
+      return res.redirect(req.get("Referrer") || "/");
+    }
     const { id, roll, store, loginas } = req.user;
 
     if (loginas == 0) {
@@ -852,10 +854,10 @@ router.post("/addaddon", auth, async (req, res) => {
 
 router.get("/deletaddon/:id", auth, async (req, res) => {
   try {
-      if (process.env.DISABLE_DB_WRITE === 'true') {
-    req.flash('error', 'For demo purpose we disabled crud operations!!');
-    return res.redirect(req.get("Referrer") || "/");
-}
+    if (process.env.DISABLE_DB_WRITE === 'true') {
+      req.flash('error', 'For demo purpose we disabled crud operations!!');
+      return res.redirect(req.get("Referrer") || "/");
+    }
     const { id, roll, store, loginas } = req.user;
 
     if (loginas == 0) {
@@ -878,10 +880,10 @@ router.get("/deletaddon/:id", auth, async (req, res) => {
       //   "DELETE FROM tbl_addons WHERE id=" + dataid + ""
       // );
 
-      if(await DataDelete(`tbl_addons`, `id = '${dataid}'`, req.hostname, req.protocol) == -1) {
-            req.flash('error', process.env.dataerror);
-            return res.redirect("/validate");
-          }
+      if (await DataDelete(`tbl_addons`, `id = '${dataid}'`, req.hostname, req.protocol) == -1) {
+        req.flash('error', process.env.dataerror);
+        return res.redirect("/validate");
+      }
 
       req.flash("success", "Addons Deleted");
       res.redirect("back");
@@ -896,10 +898,10 @@ router.get("/deletaddon/:id", auth, async (req, res) => {
 
 router.post("/updateaddon/:id", auth, async (req, res) => {
   try {
-      if (process.env.DISABLE_DB_WRITE === 'true') {
-    req.flash('error', 'For demo purpose we disabled crud operations!!');
-    return res.redirect(req.get("Referrer") || "/");
-}
+    if (process.env.DISABLE_DB_WRITE === 'true') {
+      req.flash('error', 'For demo purpose we disabled crud operations!!');
+      return res.redirect(req.get("Referrer") || "/");
+    }
     const { id, roll, store, loginas } = req.user;
 
     if (loginas == 0) {
@@ -932,18 +934,18 @@ router.post("/updateaddon/:id", auth, async (req, res) => {
       //   " ";
       // const newaddons = await DataFind(qury);
 
-const newaddons = await DataUpdate(
-  "tbl_addons",
-  `addon = '${addon_name_update}', price = ${addon_price_update}, status = ${active_update}`,
-  `id = ${req.params.id}`,
-  req.hostname,
-  req.protocol
-);
+      const newaddons = await DataUpdate(
+        "tbl_addons",
+        `addon = '${addon_name_update}', price = ${addon_price_update}, status = ${active_update}`,
+        `id = ${req.params.id}`,
+        req.hostname,
+        req.protocol
+      );
 
-if (newaddons === -1) {
-  req.flash("errors", process.env.dataerror);
-  return res.redirect("/validate");
-}
+      if (newaddons === -1) {
+        req.flash("errors", process.env.dataerror);
+        return res.redirect("/validate");
+      }
 
 
 

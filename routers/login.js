@@ -191,7 +191,7 @@ router.post("/login", async (req, res) => {
     res.cookie("webtoken", token, {
       expires: new Date(Date.now() + 1000 * 60 * 60),
       httpOnly: true,
-      sameSite: "strict",
+      sameSite: "lax",
     });
 
     const lang = req.cookies.lang;

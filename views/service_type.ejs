@@ -27,7 +27,7 @@
 }
 </style> -->
 
-        <%- include('templet/preloder_topbar_sidebar',{titel: accessdata?.topbardata?.name})-%>
+    <%- include('templet/preloder_topbar_sidebar',{titel: accessdata?.topbardata?.name})-%>
         <!--********** Content body start **********-->
 
         <div class="content-body">
@@ -67,6 +67,7 @@
                                                 <th>
                                                     <%= language.Status %>
                                                 </th>
+                                                <th>Pricing</th>
                                                 <th
                                                     class="<%= accessdata.roll.service.includes('edit') || accessdata.roll.service.includes('delete') ?'':'d-none' %>">
                                                     <%= language.Action %>
@@ -96,13 +97,22 @@
                                                                 <% } %>
                                                     </td>
                                                     <td>
+                                                        <% if(data.pricing_mode==='per_kg' ){ %>
+                                                            <span class="badge light badge-info">&#9878; Per Kg</span>
+                                                            <% } else { %>
+                                                                <span class="badge light badge-secondary">Per
+                                                                    Item</span>
+                                                                <% } %>
+                                                    </td>
+                                                    <td>
                                                         <a href="#"
                                                             class="btn btn-primary shadow sharp me-1 <%= accessdata.roll.service.includes('edit') ?'':'d-none' %>"
                                                             id="serviceType" data-bs-toggle="modal"
                                                             data-bs-target="#service_type_update"
                                                             data-id="<%= data.id %>"
                                                             data-serviceType="<%= data.services_type %>"
-                                                            data-status="<%= data.status %>">
+                                                            data-status="<%= data.status %>"
+                                                            data-pricing_mode="<%= data.pricing_mode || 'per_item' %>">
                                                             <i class="fas fa-pencil-alt"></i></a>
 
                                                         <a href="/services/deletservicestype/<%=data.id%>"
@@ -162,18 +172,26 @@
                                         </label>
                                     </div>
                                 </div>
+
+                                <div class="form-group">
+                                    <label><strong>Pricing Mode</strong></label>
+                                    <select class="form-control" name="pricing_mode" id="pricing_mode_update">
+                                        <option value="per_item">Per Item (Quantity)</option>
+                                        <option value="per_kg">Per Kg (Weight)</option>
+                                    </select>
+                                </div>
                             </div>
                     </div>
 
-                            <div class="modal-footer">
-                                <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
-                                    <%= language.Cancel %>
-                                </button>
-                                <button type="submit" class="btn btn-sm  btn-primary">
-                                    <%= language.Save %>
-                                </button>
-                            </div>
-                        </form>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                            <%= language.Cancel %>
+                        </button>
+                        <button type="submit" class="btn btn-sm  btn-primary">
+                            <%= language.Save %>
+                        </button>
+                    </div>
+                    </form>
 
 
 
@@ -196,7 +214,7 @@
 
                     <!-- Form -->
                     <div class="modal-body">
-                    <form action="/services/addtype" method="post" class="need-validation">
+                        <form action="/services/addtype" method="post" class="need-validation">
 
                             <div class="row g-1 align-items-center">
 
@@ -240,18 +258,27 @@
                                     </div>
                                 </div>
 
-                            </div>
-                        </div>
+                                <!-- Pricing Mode -->
+                                <div class="form-group">
+                                    <label><strong>Pricing Mode</strong></label>
+                                    <select class="form-control" name="pricing_mode" id="pricing_mode_add">
+                                        <option value="per_item">Per Item (Quantity)</option>
+                                        <option value="per_kg">Per Kg (Weight)</option>
+                                    </select>
+                                </div>
 
-                        <!-- Modal Footer -->
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
-                                <%= language.Cancel %>
-                            </button>
-                            <button type="submit" class="btn btn-sm btn-primary">
-                                <%= language.Save %>
-                            </button>
-                        </div>
+                            </div>
+                    </div>
+
+                    <!-- Modal Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-sm btn-secondary" data-bs-dismiss="modal">
+                            <%= language.Cancel %>
+                        </button>
+                        <button type="submit" class="btn btn-sm btn-primary">
+                            <%= language.Save %>
+                        </button>
+                    </div>
                     </form>
 
                 </div>

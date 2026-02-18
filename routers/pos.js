@@ -1310,6 +1310,10 @@ router.post("/addservicelist", auth, async (req, res) => {
     const servicetypeid = req.body.servicetype.split(",")[0];
     const servicetypeprice = req.body.servicetype.split(",")[1];
     const servicetypename = req.body.servicetype.split(",")[2];
+    const pricingMode = req.body.servicetype.split(",")[3] || "per_item";
+
+    // Sanitize pricing_mode
+    const safePricingMode = pricingMode === "per_kg" ? "per_kg" : "per_item";
 
     // const servicelist =
     //   await DataFind(`INSERT INTO tbl_cart_servicelist (service_id,service_type_id,service_type_price,service_quntity,service_color,service_name,
@@ -1317,8 +1321,8 @@ router.post("/addservicelist", auth, async (req, res) => {
 
     const servicelist = await DataInsert(
       "tbl_cart_servicelist",
-      "service_id, service_type_id, service_type_price, service_quntity, service_color, service_name, service_type_name, service_img",
-      `${serviceid}, ${servicetypeid}, ${servicetypeprice}, 1, '#000000', '${serviceName}', '${servicetypename}', '${serviceimage}'`,
+      "service_id, service_type_id, service_type_price, service_quntity, service_color, service_name, service_type_name, service_img, pricing_mode",
+      `${serviceid}, ${servicetypeid}, ${servicetypeprice}, 1, '#000000', '${serviceName}', '${servicetypename}', '${serviceimage}', '${safePricingMode}'`,
       req.hostname,
       req.protocol
     );
@@ -1652,6 +1656,30 @@ router.get("/removeservicelist/:id", auth, async (req, res) => {
   }
 });
 
+// ── Scale weight proxy ─────────────────────────────────────────────
+router.get("/scale/weight", auth, async (req, res) => {
+  try {
+    const scaleUrl = process.env.SCALE_SERVICE_URL || "http://localhost:4001";
+    const http = require("http");
+    http.get(scaleUrl + "/weight", { timeout: 3000 }, (scaleRes) => {
+      let body = "";
+      scaleRes.on("data", (chunk) => (body += chunk));
+      scaleRes.on("end", () => {
+        try {
+          res.status(200).json(JSON.parse(body));
+        } catch (e) {
+          res.status(502).json({ error: "Invalid response from scale service" });
+        }
+      });
+    }).on("error", () => {
+      res.status(503).json({ error: "Scale not connected", connected: false });
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: "Internal error" });
+  }
+});
+
 // get service type id from service
 router.get("/getservicetype/:id", auth, async (req, res) => {
   try {
@@ -1678,7 +1706,7 @@ router.get("/getservicetype/:id", auth, async (req, res) => {
       type.map(async (data, i) => {
         console.log("data", data);
         var ServiceType = await DataFind(
-          "SELECT services_type FROM tbl_services_type WHERE id =" + data + ""
+          "SELECT services_type, pricing_mode FROM tbl_services_type WHERE id =" + data + ""
         );
         console.log("ServiceType", ServiceType[0].services_type);
         console.log("price", price[i]);
@@ -1686,6 +1714,7 @@ router.get("/getservicetype/:id", auth, async (req, res) => {
           id: data,
           servicetype: ServiceType[0].services_type,
           price: price[i],
+          pricing_mode: ServiceType[0].pricing_mode || "per_item",
         };
       })
     );

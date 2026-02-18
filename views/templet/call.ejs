@@ -1,5 +1,5 @@
 <script>
-function eraseCookie(name) {
+   function eraseCookie(name) {
       document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
    }
 
@@ -536,9 +536,11 @@ function eraseCookie(name) {
       var id = $(this).attr('data-id')
       var act = "/services/updateservicestype/" + id + ""
       var tax = $(this).attr('data-status')
+      var pricingMode = $(this).attr('data-pricing_mode') || 'per_item'
 
       $("#updateservicetype_form").attr('action', act)
       $('#servicetype_name_update').attr('value', ($(this).attr('data-serviceType')))
+      $('#pricing_mode_update').val(pricingMode)
       if (tax == 0) {
          $('#active_update').prop('checked', true)
       }
@@ -966,11 +968,12 @@ function eraseCookie(name) {
             $('#pos_servicetypeselect').html('')
             $('#POS_serviceid1').attr('value', res.serviceid)
             $.each(res.data, function (index, value) {
+               var pricingLabel = value.pricing_mode === 'per_kg' ? ' &#9878; per kg' : '';
 
                if (res.accessdata.plac == 0) {
-                  $('#pos_servicetypeselect').append('<div class="form-check"><label>' + value.servicetype + '&nbsp;&nbsp; (' + res.accessdata.symbol + ' ' + value.price + ')<input class="form-check-input" type="radio" name="servicetype" value="' + value.id + ',' + value.price + ',' + value.servicetype + '" required></label></div>')
+                  $('#pos_servicetypeselect').append('<div class="form-check"><label>' + value.servicetype + '&nbsp;&nbsp; (' + res.accessdata.symbol + ' ' + value.price + pricingLabel + ')<input class="form-check-input" type="radio" name="servicetype" value="' + value.id + ',' + value.price + ',' + value.servicetype + ',' + (value.pricing_mode || 'per_item') + '" required></label></div>')
                } else {
-                  $('#pos_servicetypeselect').append('<div class="form-check"><label>' + value.servicetype + '&nbsp;&nbsp; (' + value.price + ' ' + res.accessdata.symbol + ')<input class="form-check-input" type="radio" name="servicetype" value="' + value.id + ',' + value.price + ',' + value.servicetype + '" required></label></div>')
+                  $('#pos_servicetypeselect').append('<div class="form-check"><label>' + value.servicetype + '&nbsp;&nbsp; (' + value.price + ' ' + res.accessdata.symbol + pricingLabel + ')<input class="form-check-input" type="radio" name="servicetype" value="' + value.id + ',' + value.price + ',' + value.servicetype + ',' + (value.pricing_mode || 'per_item') + '" required></label></div>')
                }
 
             })
@@ -998,10 +1001,15 @@ function eraseCookie(name) {
 
                $('#POS_service_added_list').html(' ')
                $.each(res.cartservice, function (index, value) {
+                  var pricingMode = value.pricing_mode || 'per_item';
+                  var weighBtn = pricingMode === 'per_kg'
+                     ? '<a class="btn btn-sm btn-info text-white ms-1" title="Weigh" onclick="weighItem(' + value.id + ')"><i class="fa fa-balance-scale"></i></a>'
+                     : '';
                   $('#POS_service_added_list').append('<tr>' +
                      '<td>' +
                      '<h5 class="mb-0"> ' + value.service_name + '</h5>' +
                      '<span class="mb-0 fs-6">[' + value.service_type_name + ']</span>' +
+                     (pricingMode === 'per_kg' ? '<br><span class="badge badge-info">&#9878; per kg</span>' : '') +
                      '</td>' +
                      '<td>' +
                      '<input type="color" class="p-2" value="' + value.service_color + '" id="POS_service_color"  data-id="' + value.id + '">' +
@@ -1011,8 +1019,11 @@ function eraseCookie(name) {
                      ' value="' + value.service_type_price + '" name="service_type_price" id="POSservice_type_price" data-id="' + value.id + '">' +
                      '</td>' +
                      '<td>' +
+                     '<div class="d-flex align-items-center">' +
                      '<input type="number"' +
-                     ' class="form-control h-25 text-center px-2" id="POSservice_type_quntity" value="' + value.service_quntity + '" min="1" data-id="' + value.id + '">' +
+                     ' class="form-control h-25 text-center px-2" id="POSservice_type_quntity" value="' + value.service_quntity + '" ' + (pricingMode === 'per_kg' ? 'step="0.001" min="0"' : 'min="1"') + ' data-id="' + value.id + '">' +
+                     weighBtn +
+                     '</div>' +
                      '</td>' +
                      '<td>' +
                      '<a class="btn btn-sm" id="remove_service_list" data-id="' + value.id + '"><i class="fa fa-trash  text-danger"></i></a>' +
@@ -1055,28 +1066,7 @@ function eraseCookie(name) {
 
                $('#POS_service_added_list').html(' ')
                $.each(res.cartservice, function (index, value) {
-
-                  $('#POS_service_added_list').append('<tr>' +
-                     '<td>' +
-                     '<h5 class="mb-0"> ' + value.service_name + '</h5>' +
-                     '<span class="mb-0 fs-6">[' + value.service_type_name + ']</span>' +
-                     '</td>' +
-                     '<td>' +
-                     '<input type="color" class="p-2" value="' + value.service_color + '" id="POS_service_color"  data-id="' + value.id + '">' +
-                     '</td>' +
-                     '<td>' +
-                     '<input type="number" class="form-control h-25 text-center px-2"' +
-                     ' value="' + value.service_type_price + '" name="service_type_price" id="edit_POSservice_type_price" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '">' +
-                     '</td>' +
-                     '<td>' +
-                     '<input type="number"' +
-                     ' class="form-control h-25 text-center px-2" id="edit_POSservice_type_quntity" value="' + value.service_quntity + '" min="1" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '">' +
-                     '</td>' +
-                     '<td>' +
-                     '<a class="btn btn-sm" id="edit_remove_service_list" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '"><i class="fa fa-trash  text-danger"></i></a>' +
-                     '</td>' +
-                     '</tr> ')
-
+                  $('#POS_service_added_list').append(buildCartRow(value, { edit: true, order_id: res.order_date.id }))
                })
                if (res.loginas == 0) {
                   $('input[name=service_type_price]').prop('readonly', true)
@@ -1115,27 +1105,7 @@ function eraseCookie(name) {
 
             $('#POS_service_added_list').html(' ')
             $.each(res.cartservice, function (index, value) {
-               $('#POS_service_added_list').append('<tr>' +
-                  '<td>' +
-                  '<h5 class="mb-0"> ' + value.service_name + '</h5>' +
-                  '<span class="mb-0 fs-6">[' + value.service_type_name + ']</span>' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="color" class="p-2" value="' + value.service_color + '" id="POS_service_color"  data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number" class="form-control h-25 text-center px-2"' +
-                  ' value="' + value.service_type_price + '" name="service_type_price" id="edit_POSservice_type_price" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number"' +
-                  ' class="form-control h-25 text-center px-2" id="edit_POSservice_type_quntity" value="' + value.service_quntity + '" min="1" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<a class="btn btn-sm" id="edit_remove_service_list" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '"><i class="fa fa-trash  text-danger"></i></a>' +
-                  '</td>' +
-                  '</tr> ')
-
+               $('#POS_service_added_list').append(buildCartRow(value, { edit: true, order_id: res.order_date.id }))
             })
             if (res.loginas == 0) {
                $('input[name=service_type_price]').prop('readonly', true)
@@ -1161,27 +1131,7 @@ function eraseCookie(name) {
             $('#POS_tax_total').html(res.cart.tax_amount.toFixed(2))
             $('#POS_service_added_list').html(' ')
             $.each(res.cartservice, function (index, value) {
-               $('#POS_service_added_list').append('<tr>' +
-                  '<td>' +
-                  '<h5 class="mb-0"> ' + value.service_name + '</h5>' +
-                  '<span class="mb-0 fs-6">[' + value.service_type_name + ']</span>' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="color" class="p-2" value="' + value.service_color + '" id="POS_service_color"  data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number" class="form-control h-25 text-center px-2"' +
-                  ' value="' + value.service_type_price + '" name="service_type_price" id="POSservice_type_price" data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number"' +
-                  ' class="form-control h-25 text-center px-2" id="POSservice_type_quntity" value="' + value.service_quntity + '" min="1" data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<a class="btn btn-sm" id="remove_service_list" data-id="' + value.id + '"><i class="fa fa-trash  text-danger"></i></a>' +
-                  '</td>' +
-                  '</tr> ')
-
+               $('#POS_service_added_list').append(buildCartRow(value))
             })
             if (res.loginas == 0) {
                $('input[name=service_type_price]').prop('readonly', true)
@@ -1260,6 +1210,90 @@ function eraseCookie(name) {
       })
    }
 
+   // ── Weighing Scale Integration ──────────────────────────────────────
+   function weighItem(cartItemId) {
+      var baseUrl = window.location.origin;
+      var $btn = $('[onclick="weighItem(' + cartItemId + ')"]');
+      var originalHtml = $btn.html();
+      $btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
+
+      $.ajax({
+         type: 'get',
+         url: baseUrl + "/admin/scale/weight",
+         dataType: 'json',
+         timeout: 5000,
+         success: function (res) {
+            $btn.html(originalHtml).prop('disabled', false);
+            if (res.error) {
+               toastr.error('Scale: ' + res.error);
+               return;
+            }
+            if (res.stale) {
+               toastr.warning('Scale reading may be stale. Place item on scale and try again.');
+               return;
+            }
+            if (!res.stable) {
+               toastr.warning('Scale reading unstable (' + res.weight.toFixed(3) + ' kg). Wait for stable reading.');
+               return;
+            }
+            if (res.weight <= 0) {
+               toastr.warning('Scale reads 0 kg. Place item on scale.');
+               return;
+            }
+            // Set the quantity field to the weight
+            var $qtyInput = $('input#POSservice_type_quntity[data-id="' + cartItemId + '"]');
+            if ($qtyInput.length === 0) {
+               $qtyInput = $('input#edit_POSservice_type_quntity[data-id="' + cartItemId + '"]');
+            }
+            $qtyInput.val(res.weight.toFixed(3));
+            $qtyInput.trigger('change');
+            toastr.success('Weight: ' + res.weight.toFixed(3) + ' kg');
+         },
+         error: function () {
+            $btn.html(originalHtml).prop('disabled', false);
+            toastr.error('Scale service not available. Make sure scale-service.js is running.');
+         }
+      });
+   }
+
+   // Helper: build cart row HTML for POS (supports pricing_mode)
+   function buildCartRow(value, opts) {
+      opts = opts || {};
+      var idPrefix = opts.edit ? 'edit_' : '';
+      var orderAttr = opts.order_id ? ' data-order_id="' + opts.order_id + '"' : '';
+      var pricingMode = value.pricing_mode || 'per_item';
+      var isPerKg = pricingMode === 'per_kg';
+      var weighBtn = isPerKg
+         ? '<a class="btn btn-sm btn-info text-white ms-1" title="Weigh" onclick="weighItem(' + value.id + ')"><i class="fa fa-balance-scale"></i></a>'
+         : '';
+      var qtyAttrs = isPerKg ? 'step="0.001" min="0"' : 'min="1"';
+
+      return '<tr>' +
+         '<td>' +
+         '<h5 class="mb-0"> ' + value.service_name + '</h5>' +
+         '<span class="mb-0 fs-6">[' + value.service_type_name + ']</span>' +
+         (isPerKg ? '<br><span class="badge badge-info">&#9878; per kg</span>' : '') +
+         '</td>' +
+         '<td>' +
+         '<input type="color" class="p-2" value="' + value.service_color + '" id="POS_service_color" data-id="' + value.id + '">' +
+         '</td>' +
+         '<td>' +
+         '<input type="number" class="form-control h-25 text-center px-2"' +
+         ' value="' + value.service_type_price + '" name="service_type_price" id="' + idPrefix + 'POSservice_type_price" data-id="' + value.id + '"' + orderAttr + '>' +
+         '</td>' +
+         '<td>' +
+         '<div class="d-flex align-items-center">' +
+         '<input type="number"' +
+         ' class="form-control h-25 text-center px-2" id="' + idPrefix + 'POSservice_type_quntity" value="' + value.service_quntity + '" ' + qtyAttrs + ' data-id="' + value.id + '"' + orderAttr + '>' +
+         weighBtn +
+         '</div>' +
+         '</td>' +
+         '<td>' +
+         '<a class="btn btn-sm" id="' + idPrefix + 'remove_service_list" data-id="' + value.id + '"' + orderAttr + '><i class="fa fa-trash text-danger"></i></a>' +
+         '</td>' +
+         '</tr> ';
+   }
+
 
 
    $(document).on("change", "#POSservice_type_price", function () {
@@ -1281,27 +1315,7 @@ function eraseCookie(name) {
             $('#POS_tax_total').html(res.cart.tax_amount.toFixed(2))
             $('#POS_service_added_list').html(' ')
             $.each(res.cartservice, function (index, value) {
-               $('#POS_service_added_list').append('<tr>' +
-                  '<td>' +
-                  '<h5 class="mb-0"> ' + value.service_name + '</h5>' +
-                  '<span class="mb-0 fs-6">[' + value.service_type_name + ']</span>' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="color" class="p-2" value="' + value.service_color + '" id="POS_service_color"  data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number" class="form-control h-25 text-center px-2"' +
-                  ' value="' + value.service_type_price + '" name="service_type_price" id="POSservice_type_price" data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number"' +
-                  ' class="form-control h-25 text-center px-2" id="POSservice_type_quntity" value="' + value.service_quntity + '" min="1" data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<a class="btn btn-sm" id="remove_service_list" data-id="' + value.id + '"><i class="fa fa-trash  text-danger"></i></a>' +
-                  '</td>' +
-                  '</tr> ')
-
+               $('#POS_service_added_list').append(buildCartRow(value))
             })
             if (res.loginas == 0) {
                $('input[name=service_type_price]').prop('readonly', true)
@@ -1337,27 +1351,7 @@ function eraseCookie(name) {
             $('#POS_tax_total').html(res.order_date.tax_amount.toFixed(2))
             $('#POS_service_added_list').html(' ')
             $.each(res.cartservice, function (index, value) {
-               $('#POS_service_added_list').append('<tr>' +
-                  '<td>' +
-                  '<h5 class="mb-0"> ' + value.service_name + '</h5>' +
-                  '<span class="mb-0 fs-6">[' + value.service_type_name + ']</span>' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="color" class="p-2" value="' + value.service_color + '" id="POS_service_color"  data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number" class="form-control h-25 text-center px-2"' +
-                  ' value="' + value.service_type_price + '" name="service_type_price" id="edit_POSservice_type_price" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number"' +
-                  ' class="form-control h-25 text-center px-2" id="edit_POSservice_type_quntity" value="' + value.service_quntity + '" min="1" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<a class="btn btn-sm" id="edit_remove_service_list" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '"><i class="fa fa-trash  text-danger"></i></a>' +
-                  '</td>' +
-                  '</tr> ')
-
+               $('#POS_service_added_list').append(buildCartRow(value, { edit: true, order_id: res.order_date.id }))
             })
             if (res.loginas == 0) {
                $('input[name=service_type_price]').prop('readonly', true)
@@ -1391,27 +1385,7 @@ function eraseCookie(name) {
             $('#POS_tax_total').html(res.order_date.tax_amount.toFixed(2))
             $('#POS_service_added_list').html(' ')
             $.each(res.cartservice, function (index, value) {
-               $('#POS_service_added_list').append('<tr>' +
-                  '<td>' +
-                  '<h5 class="mb-0"> ' + value.service_name + '</h5>' +
-                  '<span class="mb-0 fs-6">[' + value.service_type_name + ']</span>' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="color" class="p-2" value="' + value.service_color + '" id="POS_service_color"  data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number" class="form-control h-25 text-center px-2"' +
-                  ' value="' + value.service_type_price + '" name="service_type_price" id="edit_POSservice_type_price" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number"' +
-                  ' class="form-control h-25 text-center px-2" id="edit_POSservice_type_quntity" value="' + value.service_quntity + '" min="1" data-id="' + value.id + '" data-order_id="' + res.order_date.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<a class="btn btn-sm" id="edit_remove_service_list" data-id="' + value.id + '"><i class="fa fa-trash  text-danger"></i></a>' +
-                  '</td>' +
-                  '</tr> ')
-
+               $('#POS_service_added_list').append(buildCartRow(value, { edit: true, order_id: res.order_date.id }))
             })
             if (res.loginas == 0) {
                $('input[name=service_type_price]').prop('readonly', true)
@@ -1445,27 +1419,7 @@ function eraseCookie(name) {
             $('#POS_tax_total').html(res.cart.tax_amount.toFixed(2))
             $('#POS_service_added_list').html(' ')
             $.each(res.cartservice, function (index, value) {
-               $('#POS_service_added_list').append('<tr>' +
-                  '<td>' +
-                  '<h5 class="mb-0"> ' + value.service_name + '</h5>' +
-                  '<span class="mb-0 fs-6">[' + value.service_type_name + ']</span>' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="color" class="p-2" value="' + value.service_color + '" id="POS_service_color"  data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number" class="form-control h-25 text-center px-2"' +
-                  ' value="' + value.service_type_price + '" name="service_type_price" id="POSservice_type_price" data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<input type="number"' +
-                  ' class="form-control h-25 text-center px-2" id="POSservice_type_quntity" value="' + value.service_quntity + '" min="1" data-id="' + value.id + '">' +
-                  '</td>' +
-                  '<td>' +
-                  '<a class="btn btn-sm" id="remove_service_list" data-id="' + value.id + '"><i class="fa fa-trash  text-danger"></i></a>' +
-                  '</td>' +
-                  '</tr> ')
-
+               $('#POS_service_added_list').append(buildCartRow(value))
             })
             if (res.loginas == 0) {
                $('input[name=service_type_price]').prop('readonly', true)
@@ -1714,7 +1668,7 @@ function eraseCookie(name) {
 
 
 
-      $(document).on('click', "#edit_POS_remove_coupon", function () {
+   $(document).on('click', "#edit_POS_remove_coupon", function () {
       var couponid = $(this).attr('data-id')
       var order_id = $(this).attr('data-order_id')
       var baseUrl = window.location.origin;
@@ -2713,15 +2667,15 @@ function eraseCookie(name) {
 
                let html = "";
 
-     
-    
-            
-if (orderlist.length < 9) {
-      $('#loadMoreorder').addClass("d-none")
-      console.log("d-none");
-   }else{
-      $('#loadMoreorder').removeClass("d-none")
-   }
+
+
+
+               if (orderlist.length < 9) {
+                  $('#loadMoreorder').addClass("d-none")
+                  console.log("d-none");
+               } else {
+                  $('#loadMoreorder').removeClass("d-none")
+               }
 
                if (!orderlist || orderlist.length === 0) {
                   html += `
@@ -4007,4 +3961,4 @@ if (orderlist.length < 9) {
       })
 
    })
-   </script>
+</script>
