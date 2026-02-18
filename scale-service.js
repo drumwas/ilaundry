@@ -16,6 +16,7 @@
 const express = require("express");
 const { SerialPort } = require("serialport");
 const { ReadlineParser } = require("@serialport/parser-readline");
+require("dotenv").config({ path: "./config.env" });
 
 const app = express();
 
@@ -39,8 +40,25 @@ let serialConnected = false;
 let reconnectTimer = null;
 
 // ── Serial Port Connection ───────────────────────────────────────────
+async function listPorts() {
+    try {
+        const ports = await SerialPort.list();
+        if (ports.length === 0) {
+            console.log("[Scale] No serial ports found. Is the scale connected?");
+        } else {
+            console.log("[Scale] Available serial ports:");
+            ports.forEach((port) => {
+                console.log(`  - ${port.path} (${port.manufacturer || "Unknown"})`);
+            });
+        }
+    } catch (err) {
+        console.error("[Scale] Error listing ports:", err.message);
+    }
+}
+
 function connectSerial() {
     try {
+        console.log(`[Scale] Attempting to connect to ${SERIAL_PORT}...`);
         const port = new SerialPort({
             path: SERIAL_PORT,
             baudRate: BAUD_RATE,
@@ -98,6 +116,9 @@ function connectSerial() {
             console.error("[Scale] Serial error:", err.message);
             serialConnected = false;
             latestWeight.error = "Serial port error: " + err.message;
+            if (!reconnectTimer) {
+                listPorts(); // List ports to help debugging
+            }
             scheduleReconnect();
         });
 
@@ -113,6 +134,7 @@ function connectSerial() {
         console.error("[Scale] Connection failed:", err.message);
         serialConnected = false;
         latestWeight.error = "Connection failed: " + err.message;
+        listPorts(); // List ports to help debugging
         scheduleReconnect();
         return null;
     }
