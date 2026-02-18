@@ -5,6 +5,7 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
+    "scale": "node scale-service.js",
     "dev": "nodemon app.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -36,6 +37,7 @@
     "nocache": "^3.0.4",
     "nodemailer": "^8.0.1",
     "path": "^0.12.7",
+    "serialport": "^10.5.0",
     "set-tz": "^0.2.0",
     "timezones-list": "^3.0.1",
     "twilio": "^4.12.0",
