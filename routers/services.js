@@ -511,12 +511,10 @@ router.post("/addtype", auth, async (req, res) => {
       //   ")";
       // const newservtype = await DataFind(qury);
 
-      const newservtype = await DataInsert(
-        `tbl_services_type`,
-        `services_type,status,store_ID,pricing_mode`,
-        `${await mysql.escape(service_name)}, ${active}, ${storeid}, '${pricing_mode}'`,
-        req.hostname,
-        req.protocol
+      // Use parameterized query for safety
+      const newservtype = await DataQuery(
+        "INSERT INTO tbl_services_type (services_type, status, store_ID, pricing_mode) VALUES (?, ?, ?, ?)",
+        [service_name, active, storeid, pricing_mode]
       );
 
       if (newservtype == -1) {

@@ -16,6 +16,8 @@ const rateLimit = require("express-rate-limit");
 
 const PORT = process.env.PORT || 3000;
 
+app.set("trust proxy", 1); // Enable trust proxy for secure cookies behind load balancers/proxies
+
 app.set("view engine", "ejs");
 
 // Security headers
