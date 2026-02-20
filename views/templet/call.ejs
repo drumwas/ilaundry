@@ -1212,14 +1212,16 @@
 
    // ── Weighing Scale Integration ──────────────────────────────────────
    function weighItem(cartItemId) {
-      var baseUrl = window.location.origin;
+      // var baseUrl = window.location.origin; // OLD: Remote server proxy
+      var scaleUrl = "http://localhost:4001/weight"; // NEW: Local scale service
+
       var $btn = $('[onclick="weighItem(' + cartItemId + ')"]');
       var originalHtml = $btn.html();
       $btn.html('<i class="fa fa-spinner fa-spin"></i>').prop('disabled', true);
 
       $.ajax({
          type: 'get',
-         url: baseUrl + "/admin/scale/weight",
+         url: scaleUrl,
          dataType: 'json',
          timeout: 5000,
          success: function (res) {
@@ -1249,9 +1251,10 @@
             $qtyInput.trigger('change');
             toastr.success('Weight: ' + res.weight.toFixed(3) + ' kg');
          },
-         error: function () {
+         error: function (xhr, status, error) {
             $btn.html(originalHtml).prop('disabled', false);
-            toastr.error('Scale service not available. Make sure scale-service.js is running.');
+            console.error("Scale error:", status, error);
+            toastr.error('Could not connect to local scale service. Ensure "npm run scale" is running on THIS computer.');
          }
       });
    }

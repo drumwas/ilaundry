@@ -19,6 +19,8 @@ const { ReadlineParser } = require("@serialport/parser-readline");
 require("dotenv").config({ path: "./config.env" });
 
 const app = express();
+const cors = require('cors');
+app.use(cors()); // Allow all origins (needed for local-remote communication)
 
 // ── Configuration ────────────────────────────────────────────────────
 const SERIAL_PORT = process.env.SCALE_PORT || (process.platform === "win32" ? "COM3" : "/dev/ttyUSB0");
