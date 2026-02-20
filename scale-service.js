@@ -40,6 +40,7 @@ let latestWeight = {
 
 let serialConnected = false;
 let reconnectTimer = null;
+let currentPort = null;
 
 // ── Serial Port Connection ───────────────────────────────────────────
 async function listPorts() {
@@ -58,7 +59,63 @@ async function listPorts() {
     }
 }
 
+function parseWeight(data) {
+    if (!data) return null;
+    const trimmed = data.trim();
+
+    // Check stability: ST = Stable, US = Unstable
+    // Some scales send "ST" or "US", others might differ. 
+    // Logic: if it has ST it's stable, or if it doesn't have US it might be stable (depending on scale).
+    // T-Scale usually sends ST or US.
+    const isStable = trimmed.includes('ST') && !trimmed.includes('US');
+
+    // Check if Net or Gross
+    const isNet = trimmed.includes('NT');
+
+    // Extract weight - handles: "ST,GS,  12.50 kg" or "+012.50 kg 0"
+    // Regex matches optional negative sign, numbers, and unit
+    const weightMatch = trimmed.match(/(-?\s*[\d.]+)\s*(kg|g|lb|oz)/i);
+
+    if (weightMatch) {
+        let weight = parseFloat(weightMatch[1].replace(/\s/g, ''));
+        let unit = weightMatch[2].toLowerCase();
+
+        // Convert to kg if needed
+        if (unit === 'g') {
+            weight = weight / 1000;
+            unit = 'kg';
+        } else if (unit === 'lb') {
+            weight = weight * 0.453592;
+            unit = 'kg';
+        } else if (unit === 'oz') {
+            weight = weight * 0.0283495;
+            unit = 'kg';
+        }
+
+        return {
+            weight: Math.round(weight * 1000) / 1000, // Round to 3 decimals
+            unit: 'kg', // Always normalized to kg
+            raw: trimmed,
+            timestamp: new Date().toISOString(),
+            stable: isStable,
+            net: isNet,
+            error: null,
+        };
+    }
+    return null;
+}
+
 function connectSerial() {
+    // 1. Close existing port before reconnecting (prevents memory leak)
+    if (currentPort && currentPort.isOpen) {
+        try {
+            console.log("[Scale] Closing old port connection...");
+            currentPort.close();
+        } catch (e) {
+            console.log("[Scale] Error closing old port:", e.message);
+        }
+    }
+
     try {
         console.log(`[Scale] Attempting to connect to ${SERIAL_PORT}...`);
         const port = new SerialPort({
@@ -68,6 +125,8 @@ function connectSerial() {
             parity: "none",
             stopBits: 1,
         });
+
+        currentPort = port; // Keep reference
 
         const parser = port.pipe(new ReadlineParser({ delimiter: "\r\n" }));
 
@@ -83,31 +142,9 @@ function connectSerial() {
 
         parser.on("data", (data) => {
             try {
-                const trimmed = data.trim();
-                // T-Scale format examples: "ST,GS,  1.234kg", "ST,NT,  0.000kg", "US,GS,  1.234kg"
-                // ST = Stable, US = Unstable
-                // GS = Gross, NT = Net
-                const isStable = trimmed.startsWith("ST");
-                const weightMatch = trimmed.match(/([\d.]+)\s*(kg|g|lb|oz)/i);
-
-                if (weightMatch) {
-                    let weight = parseFloat(weightMatch[1]);
-                    let unit = weightMatch[2].toLowerCase();
-
-                    // Convert to kg if needed
-                    if (unit === "g") {
-                        weight = weight / 1000;
-                        unit = "kg";
-                    }
-
-                    latestWeight = {
-                        weight: weight,
-                        unit: unit,
-                        raw: trimmed,
-                        timestamp: new Date().toISOString(),
-                        stable: isStable,
-                        error: null,
-                    };
+                const parsed = parseWeight(data);
+                if (parsed) {
+                    latestWeight = parsed;
                 }
             } catch (parseError) {
                 console.error("[Scale] Parse error:", parseError.message);
